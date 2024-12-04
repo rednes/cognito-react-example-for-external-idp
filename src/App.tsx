@@ -1,34 +1,58 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+import { useEffect, useState } from "react";
+
+import { Amplify } from "aws-amplify";
+import {
+  signInWithRedirect,
+  getCurrentUser,
+  fetchAuthSession,
+  signOut,
+} from "aws-amplify/auth";
+import { config } from "./amplifyConfigure.ts";
+
+Amplify.configure(config);
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [user, setUser] = useState<string>("");
+  const [session, setSession] = useState<string>("");
+  const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const user = await getCurrentUser();
+        const session = await fetchAuthSession();
+        setUser(JSON.stringify(user, null, 2));
+        setSession(JSON.stringify(session, null, 2));
+        setIsSignedIn(true);
+      } catch {
+        setIsSignedIn(false);
+      }
+    };
+    init();
+  }, [setUser, setSession, setIsSignedIn]);
 
   return (
-    <>
+    <div>
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <h1>Cognito User Pools sample with external IdP</h1>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+      <div>
+        <button onClick={() => signInWithRedirect()} disabled={isSignedIn}>
+          Open Managed Login
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+        <button onClick={() => signOut()} disabled={!isSignedIn}>
+          Sign Out
+        </button>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+      <div>
+        <label>Signed In?：</label>
+        <span>{isSignedIn ? "TRUE" : "FALSE"}</span>
+      </div>
+      <div>
+        <pre>{user}</pre>
+        <pre>{session}</pre>
+      </div>
+    </div>
   );
 }
 
