@@ -4,7 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "cfn:delete": "aws cloudformation delete-stack --stack-name CognitoSimpleExample",
+    "cfn:deploy": "aws cloudformation deploy --template-file ./cloudformation/template.yaml --stack-name CognitoReactExample --capabilities CAPABILITY_IAM",
+    "cfn:describe": "aws cloudformation describe-stacks --query 'Stacks[0].[Outputs[].[OutputKey,OutputValue]]|[]' --output table --stack-name CognitoReactExample",    "cfn-valid": "aws cloudformation validate-template --template-body file://./cloudformation/template.yaml",
+    "cfn:valid": "aws cloudformation validate-template --template-body file://./cloudformation/template.yaml",
+    "dev": "vite --port 3000",
     "build": "tsc -b && vite build",
     "format": "prettier ./src --write",
     "lint": "eslint ./src --fix",
